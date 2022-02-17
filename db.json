@@ -1,0 +1,40 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "productName": "Playera",
+      "productDesc": "Playera de algodon",
+      "productPrice": 150
+    },
+    {
+      "productName": "Pantalon",
+      "productDesc": "Pantalon de mezclilla",
+      "productPrice": "280",
+      "id": 2
+    },
+    {
+      "productName": "Playera 2",
+      "productDesc": "Playera de prueba",
+      "productPrice": "180",
+      "id": 3
+    },
+    {
+      "productName": "PLayera 3",
+      "productDesc": "Playera 3 prueba",
+      "productPrice": "100",
+      "id": 4
+    },
+    {
+      "productName": "Tenis",
+      "productDesc": "Tenis para correr Nike",
+      "productPrice": "1200",
+      "id": 5
+    },
+    {
+      "productName": "sdfsdfs",
+      "productDesc": "sdfsdf",
+      "productPrice": "342",
+      "id": 6
+    }
+  ]
+}

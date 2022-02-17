@@ -1,56 +1,162 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import Box from "@mui/material/Box";
-
 import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductCard from "../Components/ProductCard";
-
-const initialValues = [
-  {
-    id: 1,
-    productName: "Playera",
-    productDesc: "Playera de algodon",
-    productPrice: 150,
-  },
-  {
-    id: 2,
-    productName: "Playera",
-    productDesc: "Playera de algodon",
-    productPrice: 150,
-  },
-  {
-    id: 3,
-    productName: "Playera",
-    productDesc: "Playera de algodon",
-    productPrice: 150,
-  },
-  {
-    id: 4,
-    productName: "Playera",
-    productDesc: "Playera de algodon",
-    productPrice: 150,
-  },
-  {
-    id: 5,
-    productName: "Playera",
-    productDesc: "Playera de algodon",
-    productPrice: 150,
-  },
-];
+import axios from "axios";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Modal from "@mui/material/Modal";
+import TextField from "@mui/material/TextField";
 
 export default function Home() {
-  const [products, setProducts] = useState(initialValues);
+  const initialProduct = {
+    productName: "",
+    productDesc: "",
+    productPrice: 0,
+  };
+  const initialError = {
+    open: false,
+    text: "",
+  };
+  const [products, setProducts] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [error, setError] = useState(initialError);
+  const [product, setProduct] = useState(initialProduct);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/products");
+      setProducts(response.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const openForm = () => {
+    setIsOpen(true);
+  };
+
+  const closeForm = () => {
+    setIsOpen(false);
+  };
+
+  const handleChange = (event) => {
+    let eventName = event.target.name;
+    let eventValue = event.target.value;
+
+    setProduct({
+      ...product,
+      [eventName]: eventValue,
+    });
+  };
+
+  const handleSubmit = async (event) => {
+    // Evitar comportamiento por defecto
+    event.preventDefault();
+
+    // Validar que todos los campos no vengan vacios
+    if (
+      product.productName.trim() === "" ||
+      product.productDesc.trim() === "" ||
+      product.productPrice.trim() === ""
+    ) {
+      setError({
+        open: true,
+        text: "Todos los campos son obligatorios",
+      });
+      return;
+    }
+
+    // Agregar producto a la BD
+    console.log(product);
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/products",
+        product
+      );
+      console.log(response);
+      // Cerrar modal cuando tenga exito
+      if (response.status === 201) {
+        closeForm();
+        fetchData();
+      }
+    } catch (err) {
+      console.log(err);
+    }
+
+    // Reiniciar el estado product y reiniciar error
+    setProduct(initialProduct);
+    setError(initialError);
+  };
+
   return (
-    <Container>
-      <Grid container spacing={2}>
-        {products.map((product) => (
-          <Grid item xs={12} md={6}>
-            <ProductCard product={product} />
-          </Grid>
-        ))}
-      </Grid>
-    </Container>
+    <>
+      <Modal
+        open={isOpen}
+        onClose={closeForm}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box className={styles.modal}>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              label="Nombre"
+              name="productName"
+              value={product.productName}
+              onChange={handleChange}
+              variant="outlined"
+              fullWidth
+            />
+            <TextField
+              label="Descripcion"
+              name="productDesc"
+              value={product.productDesc}
+              onChange={handleChange}
+              variant="outlined"
+              fullWidth
+              sx={{
+                margin: "1rem 0",
+              }}
+            />
+            <TextField
+              label="Precio"
+              name="productPrice"
+              value={product.productPrice}
+              onChange={handleChange}
+              variant="outlined"
+              fullWidth
+            />
+            {error.open && <h3>{error.text}</h3>}
+            <Button variant="contained" sx={{ margin: "1rem 0" }} type="submit">
+              Agregar
+            </Button>
+          </form>
+        </Box>
+      </Modal>
+      <Container>
+        {products.length === 0 && <h1>No hay productos</h1>}
+        <Button
+          variant="contained"
+          sx={{ margin: "1rem 0" }}
+          onClick={openForm}
+        >
+          Agregar producto
+        </Button>
+        <Grid container spacing={2}>
+          {products.map((product) => (
+            <Grid item xs={12} md={6} key={product.id}>
+              <ProductCard product={product} />
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+    </>
   );
 }
