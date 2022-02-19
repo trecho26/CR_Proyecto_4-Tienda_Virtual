@@ -3,13 +3,14 @@ import styles from "../styles/Home.module.css";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import ProductCard from "../Components/ProductCard";
 import axios from "axios";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
+import ProductsContext from "../Context/ProductsContext";
 
 export default function Home() {
   const initialProduct = {
@@ -21,23 +22,12 @@ export default function Home() {
     open: false,
     text: "",
   };
-  const [products, setProducts] = useState([]);
+
+  const { products, addProduct } = useContext(ProductsContext);
+
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState(initialError);
   const [product, setProduct] = useState(initialProduct);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/products");
-      setProducts(response.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   const openForm = () => {
     setIsOpen(true);
@@ -75,20 +65,11 @@ export default function Home() {
     }
 
     // Agregar producto a la BD
-    console.log(product);
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/products",
-        product
-      );
-      console.log(response);
-      // Cerrar modal cuando tenga exito
-      if (response.status === 201) {
-        closeForm();
-        fetchData();
-      }
-    } catch (err) {
-      console.log(err);
+    let response = await addProduct(product);
+
+    // Cerrar modal
+    if (response) {
+      closeForm();
     }
 
     // Reiniciar el estado product y reiniciar error
